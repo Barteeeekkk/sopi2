@@ -435,16 +435,43 @@
   .band{padding:110px 0}
   .band-tint{background:linear-gradient(180deg, rgba(20,6,9,0) 0%, rgba(20,6,9,0.6) 22%, rgba(20,6,9,0.6) 78%, rgba(20,6,9,0) 100%)}
 
-  /* ============ services ============ */
-  .svc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;perspective:1200px}
+  /* ============ services carousel ============ */
+  /* Base (no-JS / mobile / reduced-motion): a swipeable, scroll-snapped row. */
+  .carousel-pin{position:relative}
+  .carousel-stage{position:static;height:auto;display:block;overflow:visible}
+  .carousel-track{
+    display:flex;gap:16px;perspective:1200px;
+    overflow-x:auto;-webkit-overflow-scrolling:touch;
+    scroll-snap-type:x proximity;scroll-padding:20px;
+    padding:6px 20px 16px;margin:0 calc(var(--header-x) * -1);
+  }
+  .carousel-track::-webkit-scrollbar{height:6px}
+  .carousel-track::-webkit-scrollbar-thumb{background:rgba(255,150,168,0.35);border-radius:99px}
+  .carousel-dots{display:none}
+
+  /* Upgraded (JS, desktop, motion allowed): pinned scroll-scrubbed carousel. */
+  .carousel-pin.pin-active .carousel-stage{
+    position:sticky;top:96px;height:calc(100vh - 96px);
+    display:flex;align-items:center;overflow:hidden;
+  }
+  .carousel-pin.pin-active .carousel-track{
+    overflow:visible;scroll-snap-type:none;margin:0;padding:0;will-change:transform;
+  }
+  .carousel-pin.pin-active .carousel-card{flex-basis:360px}
+  .carousel-pin.pin-active .carousel-dots{
+    display:flex;gap:8px;position:absolute;left:50%;bottom:22px;transform:translateX(-50%);z-index:2;
+  }
+  .carousel-dots span{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.25);transition:background .3s ease, transform .3s ease}
+  .carousel-dots span.active{background:var(--accent-2);transform:scale(1.35)}
+
   .svc-card{
-    position:relative;overflow:hidden;
+    position:relative;overflow:hidden;flex:0 0 300px;scroll-snap-align:center;
     background:linear-gradient(160deg, rgba(34,9,13,0.82), rgba(18,5,8,0.58));
     border:1px solid var(--border);border-radius:16px;padding:28px 26px;
     backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-    transform:perspective(1000px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(var(--ty,0px));
+    transform:perspective(1000px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(var(--ty,0px)) scale(var(--cs,1));
     transform-style:preserve-3d;
-    transition:border-color .35s ease, transform .35s ease, box-shadow .35s ease;
+    transition:border-color .35s ease, box-shadow .35s ease;
   }
   .svc-card::before{
     content:"";position:absolute;inset:0;opacity:0;
@@ -640,7 +667,6 @@
     .hero-stats{gap:12px 28px;padding-bottom:44px}
     .hstat b{font-size:20px}
     .band{padding:80px 0}
-    .svc-grid{grid-template-columns:repeat(2,1fr)}
     .process-grid{grid-template-columns:repeat(2,1fr)}
     .proof-card{grid-template-columns:1fr}
     .why-grid{grid-template-columns:1fr}
@@ -652,8 +678,8 @@
   }
   @media (max-width:640px){
     :root{--h1:32px;--header-x:18px}
-    .svc-grid{grid-template-columns:1fr}
     .process-grid{grid-template-columns:1fr}
+    .svc-card{flex-basis:80vw}
     .hero-actions{flex-direction:column;align-items:stretch;width:100%}
     .hero-actions .btn{width:100%}
     .hero-stats{flex-direction:column;gap:14px}
@@ -812,64 +838,70 @@
           <p class="anim anim--soft" style="--d:0.34s">Łączymy pozycjonowanie lokalne i krajowe, wizytówkę Google, treści i budowanie autorytetu w jedną spójną strategię wzrostu.</p>
         </div>
 
-        <div class="svc-grid">
-          <article class="svc-card anim anim--soft" style="--d:0.05s">
-            <div class="svc-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-5.4-7-11a7 7 0 0 1 14 0c0 5.6-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg></div>
-            <h3>Pozycjonowanie lokalne</h3>
-            <p>Docieramy do klientów szukających Twoich usług w konkretnym mieście czy okolicy — w wynikach Google i na mapach.</p>
-            <a href="#proces" class="link-arrow">Czytaj więcej <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-          </article>
+      </div>
 
-          <article class="svc-card anim anim--soft" style="--d:0.12s">
-            <div class="svc-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg></div>
-            <h3>Pozycjonowanie krajowe</h3>
-            <p>Budujemy widoczność organiczną w całej Polsce: badanie słów kluczowych, struktura strony, treści i autorytet domeny.</p>
-            <a href="#proces" class="link-arrow">Czytaj więcej <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-          </article>
+      <div class="carousel-pin" id="svcPin">
+        <div class="carousel-stage">
+          <div class="carousel-track" id="svcTrack">
+            <article class="svc-card carousel-card">
+              <div class="svc-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-5.4-7-11a7 7 0 0 1 14 0c0 5.6-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg></div>
+              <h3>Pozycjonowanie lokalne</h3>
+              <p>Docieramy do klientów szukających Twoich usług w konkretnym mieście czy okolicy — w wynikach Google i na mapach.</p>
+              <a href="#proces" class="link-arrow">Czytaj więcej <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+            </article>
 
-          <article class="svc-card anim anim--soft" style="--d:0.19s">
-            <div class="svc-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 4l9 6.5M5 9.5V20h5v-6h4v6h5V9.5"/></svg></div>
-            <h3>Wizytówka Google</h3>
-            <p>Optymalizujemy profil firmy: kategorie, opis, zdjęcia, posty i opinie, by wyróżnić się w lokalnych wynikach i mapach.</p>
-          </article>
+            <article class="svc-card carousel-card">
+              <div class="svc-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg></div>
+              <h3>Pozycjonowanie krajowe</h3>
+              <p>Budujemy widoczność organiczną w całej Polsce: badanie słów kluczowych, struktura strony, treści i autorytet domeny.</p>
+              <a href="#proces" class="link-arrow">Czytaj więcej <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+            </article>
 
-          <article class="svc-card anim anim--soft" style="--d:0.05s">
-            <div class="svc-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
-            <h3>Audyt SEO</h3>
-            <p>Analizujemy stronę pod kątem technicznym, treści i konkurencji — i przekładamy to na konkretny plan działań.</p>
-            <a href="#kontakt" class="link-arrow">Zamów audyt <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-          </article>
+            <article class="svc-card carousel-card">
+              <div class="svc-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 4l9 6.5M5 9.5V20h5v-6h4v6h5V9.5"/></svg></div>
+              <h3>Wizytówka Google</h3>
+              <p>Optymalizujemy profil firmy: kategorie, opis, zdjęcia, posty i opinie, by wyróżnić się w lokalnych wynikach i mapach.</p>
+            </article>
 
-          <article class="svc-card anim anim--soft" style="--d:0.12s">
-            <div class="svc-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></div>
-            <h3>Konsultacje SEO</h3>
-            <p>Bezpośredni dostęp do specjalisty SEO — druga opinia, priorytety działań albo pomoc w budowie strategii.</p>
-          </article>
+            <article class="svc-card carousel-card">
+              <div class="svc-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+              <h3>Audyt SEO</h3>
+              <p>Analizujemy stronę pod kątem technicznym, treści i konkurencji — i przekładamy to na konkretny plan działań.</p>
+              <a href="#kontakt" class="link-arrow">Zamów audyt <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+            </article>
 
-          <article class="svc-card anim anim--soft" style="--d:0.19s">
-            <div class="svc-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h13"/></svg></div>
-            <h3>Treści pod SEO</h3>
-            <p>Tworzymy strony i artykuły wokół tego, czego naprawdę szukają Twoi klienci — użyteczne dla ludzi i dla Google.</p>
-          </article>
+            <article class="svc-card carousel-card">
+              <div class="svc-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></div>
+              <h3>Konsultacje SEO</h3>
+              <p>Bezpośredni dostęp do specjalisty SEO — druga opinia, priorytety działań albo pomoc w budowie strategii.</p>
+            </article>
 
-          <article class="svc-card anim anim--soft" style="--d:0.05s">
-            <div class="svc-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1.2 1.2M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1.2-1.2"/></svg></div>
-            <h3>Link building</h3>
-            <p>Zwiększamy autorytet strony pozyskując wartościowe linki z branżowych i lokalnych źródeł.</p>
-          </article>
+            <article class="svc-card carousel-card">
+              <div class="svc-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h13"/></svg></div>
+              <h3>Treści pod SEO</h3>
+              <p>Tworzymy strony i artykuły wokół tego, czego naprawdę szukają Twoi klienci — użyteczne dla ludzi i dla Google.</p>
+            </article>
 
-          <article class="svc-card anim anim--soft" style="--d:0.12s">
-            <div class="svc-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg></div>
-            <h3>Monitoring i raporty</h3>
-            <p>Śledzimy pozycje, widoczność i ruch, żeby zawsze wiedzieć, co działa i co robimy w kolejnym miesiącu.</p>
-          </article>
+            <article class="svc-card carousel-card">
+              <div class="svc-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1.2 1.2M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1.2-1.2"/></svg></div>
+              <h3>Link building</h3>
+              <p>Zwiększamy autorytet strony pozyskując wartościowe linki z branżowych i lokalnych źródeł.</p>
+            </article>
 
-          <article class="svc-card anim anim--soft" style="--d:0.19s">
-            <div class="svc-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M7 21h10M9 18v3M15 18v3"/></svg></div>
-            <h3>AI SEO / GEO</h3>
-            <p>Przygotowujemy markę na wyszukiwanie z AI, by pojawiać się w odpowiedziach asystentów, nie tylko w klasycznych wynikach.</p>
-            <a href="#ai-seo" class="link-arrow">Dowiedz się więcej <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-          </article>
+            <article class="svc-card carousel-card">
+              <div class="svc-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg></div>
+              <h3>Monitoring i raporty</h3>
+              <p>Śledzimy pozycje, widoczność i ruch, żeby zawsze wiedzieć, co działa i co robimy w kolejnym miesiącu.</p>
+            </article>
+
+            <article class="svc-card carousel-card">
+              <div class="svc-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M7 21h10M9 18v3M15 18v3"/></svg></div>
+              <h3>AI SEO / GEO</h3>
+              <p>Przygotowujemy markę na wyszukiwanie z AI, by pojawiać się w odpowiedziach asystentów, nie tylko w klasycznych wynikach.</p>
+              <a href="#ai-seo" class="link-arrow">Dowiedz się więcej <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+            </article>
+          </div>
+          <div class="carousel-dots" id="svcDots" aria-hidden="true"></div>
         </div>
       </div>
     </section>
@@ -1473,6 +1505,114 @@
       }
     });
   });
+
+  /* ---- services: scroll-scrubbed pinned carousel ----
+     Desktop + motion allowed: the section's height is stretched so that,
+     while it's pinned via position:sticky, the vertical scroll a visitor
+     already made is remapped 1:1 (through a light lerp for a fluid, non-
+     laggy trail) into horizontal travel of the card track. Cards nearest
+     the stage centre scale up, sharpen and fade in; the rest recede. Once
+     the last card is centred the pin's height runs out and the page
+     continues scrolling normally into the next section.
+     Mobile / reduced motion: falls back to a plain swipeable, scroll-
+     snapped row — no pinning, no scroll-jacking. */
+  (function initServicesCarousel(){
+    var pin = document.getElementById('svcPin');
+    if(!pin) return;
+    var stage = pin.querySelector('.carousel-stage');
+    var track = document.getElementById('svcTrack');
+    var cards = Array.prototype.slice.call(track.querySelectorAll('.carousel-card'));
+    var dotsWrap = document.getElementById('svcDots');
+    if(!stage || !track || !cards.length) return;
+
+    var HEADER_OFFSET = 96;
+    var rafId = null, active = false, pinned = false;
+    var runway = 0, currentX = 0, targetX = 0;
+
+    function teardownPinned(){
+      pin.classList.remove('pin-active');
+      pin.style.height = '';
+      track.style.transform = '';
+      cards.forEach(function(c){
+        c.style.opacity = '';
+        c.style.filter = '';
+        c.style.removeProperty('--cs');
+      });
+      if(rafId !== null){ cancelAnimationFrame(rafId); rafId = null; }
+    }
+
+    function measure(){
+      var stageRect = stage.getBoundingClientRect();
+      runway = Math.max(0, track.scrollWidth - stageRect.width);
+      pin.style.height = ((window.innerHeight - HEADER_OFFSET) + runway) + 'px';
+    }
+
+    function frame(){
+      var pinRect = pin.getBoundingClientRect();
+      var raw = -(pinRect.top - HEADER_OFFSET);
+      var progress = runway > 0 ? Math.min(Math.max(raw / runway, 0), 1) : 0;
+      targetX = -progress * runway;
+      currentX += (targetX - currentX) * 0.16;
+      if(Math.abs(targetX - currentX) < 0.05) currentX = targetX;
+      track.style.transform = 'translate3d(' + currentX.toFixed(2) + 'px,0,0)';
+
+      var stageRect = stage.getBoundingClientRect();
+      var centerX = stageRect.left + stageRect.width / 2;
+      var nearestIdx = 0, nearestDist = Infinity;
+      cards.forEach(function(card, i){
+        var r = card.getBoundingClientRect();
+        var dist = Math.abs((r.left + r.width / 2) - centerX);
+        var norm = Math.max(0, 1 - dist / (stageRect.width * 0.55));
+        var scale = 0.85 + norm * 0.15;
+        var opacity = 0.38 + norm * 0.62;
+        var blur = (1 - norm) * 3.2;
+        card.style.setProperty('--cs', scale.toFixed(3));
+        card.style.opacity = opacity.toFixed(3);
+        card.style.filter = blur > 0.05 ? 'blur(' + blur.toFixed(2) + 'px)' : 'none';
+        if(dist < nearestDist){ nearestDist = dist; nearestIdx = i; }
+      });
+      if(dotsWrap){
+        for(var i = 0; i < dotsWrap.children.length; i++){
+          dotsWrap.children[i].classList.toggle('active', i === nearestIdx);
+        }
+      }
+      rafId = active ? requestAnimationFrame(frame) : null;
+    }
+
+    function setup(){
+      var shouldPin = window.matchMedia('(min-width:901px)').matches && !reduceMotion;
+      if(!shouldPin){
+        teardownPinned();
+        pinned = false;
+        return;
+      }
+      pinned = true;
+      pin.classList.add('pin-active');
+      if(dotsWrap && !dotsWrap.children.length){
+        dotsWrap.innerHTML = cards.map(function(){ return '<span></span>'; }).join('');
+      }
+      measure();
+      frame();
+    }
+
+    setup();
+
+    if('IntersectionObserver' in window){
+      new IntersectionObserver(function(entries){
+        active = pinned && entries[0].isIntersecting;
+        if(active && rafId === null){ rafId = requestAnimationFrame(frame); }
+      }, {threshold:0, rootMargin:'260px 0px 260px 0px'}).observe(pin);
+    } else if(pinned){
+      active = true;
+      frame();
+    }
+
+    var resizeTimer;
+    window.addEventListener('resize', function(){
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(setup, 160);
+    });
+  })();
 })();
 </script>
 </body>
